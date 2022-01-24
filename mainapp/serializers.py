@@ -23,7 +23,7 @@ class QuestionnaireSerializer(ModelSerializer):
 
 
 class ApplicationSerializer(ModelSerializer):
-    # customer_profile = QuestionnaireSerializer()
+    customer_profile = QuestionnaireSerializer()
     # offer = OfferSerializer()
 
     class Meta:

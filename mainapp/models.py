@@ -1,5 +1,6 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+from django.core.exceptions import ValidationError
 
 
 class Organization(models.Model):
@@ -43,6 +44,12 @@ class Offer(models.Model):
     def __str__(self):
         return f'Предложение {self.offer_name}'
 
+    def clean(self):
+        if self.date_end_rotation < self.date_start_rotation:
+            raise ValidationError('Дата окончания не может быть раньше даты начала')
+        if self.max_scoring < self.min_scoring:
+            raise ValidationError('Максимальный балл не может быть меньше минимального балла')
+
 
 class Questionnaire(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')
@@ -66,7 +73,8 @@ class Questionnaire(models.Model):
 class Application(models.Model):
     STATUS_TYPES = [
         ['N', 'NEW'],
-        ['S', 'SENT']
+        ['S', 'SENT'],
+        ['R', 'RECEIVED']
     ]
 
     date_created = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')
@@ -84,6 +92,10 @@ class Application(models.Model):
 
     def __str__(self):
         return f'Заявка №{self.id} от {self.customer_profile.first_name} {self.customer_profile.last_name}'
+
+    def set_received(self):
+        self.status = 'R'
+        self.save()
 
 
 
