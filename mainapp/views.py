@@ -29,21 +29,26 @@ from .permissions import SuperUserOnly, PartnerOnly, OrganizationOnly
 #     serializer_class = QuestionnaireSerializer
 
 
-class QuestionnairePartnerViewSet(ModelViewSet):
+class QuestionnairePartnerViewSet(mixins.ListModelMixin,
+                                  mixins.RetrieveModelMixin,
+                                  mixins.CreateModelMixin,
+                                  GenericViewSet):
     queryset = Questionnaire.objects.all()
     serializer_class = QuestionnaireSerializer
     search_fields = ['first_name', 'last_name', 'patronymic']
     ordering_fields = ['last_name', 'date_created', 'date_updated']
-    permission_classes = [SuperUserOnly, PartnerOnly]
+    # permission_classes = [SuperUserOnly, PartnerOnly]
 
 
-class ApplicationPartnerViewSet(ModelViewSet):
+class ApplicationPartnerViewSet(mixins.CreateModelMixin, GenericViewSet):
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
     permission_classes = [SuperUserOnly, PartnerOnly]
 
 
-class ApplicationOrganizationViewSet(ModelViewSet):
+class ApplicationOrganizationViewSet(mixins.ListModelMixin,
+                                     mixins.RetrieveModelMixin,
+                                     GenericViewSet):
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
     search_fields = [
