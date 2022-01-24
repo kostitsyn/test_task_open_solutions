@@ -18,6 +18,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter, SimpleRouter
 from mainapp.views import QuestionnairePartnerViewSet, ApplicationPartnerViewSet, ApplicationOrganizationViewSet
 from rest_framework.authtoken import views
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
 partner_router = DefaultRouter()
@@ -30,8 +31,11 @@ organization_router.register('applications', ApplicationOrganizationViewSet, bas
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api-auth/', include('rest_framework.urls')),
     path('api/partners/', include(partner_router.urls)),
     path('api/organizations/', include(organization_router.urls)),
     path('api-token-auth/', views.obtain_auth_token),
-    path('admin-tools/', include('admin_tools.urls'))
+    path('admin-tools/', include('admin_tools.urls')),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

@@ -1,6 +1,7 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class Organization(models.Model):
@@ -49,6 +50,10 @@ class Offer(models.Model):
             raise ValidationError('Дата окончания не может быть раньше даты начала')
         if self.max_scoring < self.min_scoring:
             raise ValidationError('Максимальный балл не может быть меньше минимального балла')
+        if self.min_scoring < 300:
+            raise ValidationError('Минимальное значение скорингового балла 300')
+        if self.max_scoring > 850:
+            raise ValidationError('Максимальное значение скорингового балл 850')
 
 
 class Questionnaire(models.Model):
@@ -60,7 +65,8 @@ class Questionnaire(models.Model):
     birth_date = models.DateField(verbose_name='Дата рождения')
     phone = PhoneNumberField(unique=True, verbose_name='Номер телефона')
     passport = models.IntegerField(verbose_name='Номер паспорта', unique=True)
-    scoring = models.IntegerField(default=0, verbose_name='Скоринговый балл')
+    scoring = models.IntegerField(default=0, verbose_name='Скоринговый балл',
+                                  validators=[MinValueValidator(350), MaxValueValidator(850)])
 
     class Meta:
         verbose_name = 'Анкета'
