@@ -13,18 +13,34 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from rest_framework_nested import routers
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from mainapp.views import QuestionnaireModelViewSet, ApplicationModelViewSet
+from mainapp.views import QuestionnairePartnerViewSet, ApplicationPartnerViewSet, ApplicationOrganizationViewSet
 
 
 router = DefaultRouter()
 
-router.register('questionnaires', QuestionnaireModelViewSet)
-router.register('applications', ApplicationModelViewSet)
+# router.register('partner_questionnaires', QuestionnairePartnerViewSet)
+# router.register('partner_applications', ApplicationPartnerViewSet)
+
+# router.register('organization_applications', ApplicationOrganizationViewSet)
+
+
+# router.register('partner', router, basename='partner')
+# router.register('organization', router, basename='organization')
+
+partner_router = routers.NestedSimpleRouter(router, 'partners', lookup='partner')
+partner_router.register('partner_questionnaires1', QuestionnairePartnerViewSet, basename='questionnaire_partner')
+partner_router.register('partner_applications1', ApplicationPartnerViewSet, basename='organization_partner')
+
+organization_router = routers.NestedSimpleRouter(router, 'organizations', lookup='organization')
+organization_router.register('orga')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls))
+    path('api/', include(router.urls)),
+    path('api/partner/', include(partner_router.urls)),
+    path('api/organization/', include(organization_router.urls))
 ]
