@@ -9,7 +9,7 @@ class QuestionnairePartnerViewSet(ModelViewSet):
     """
     ## Партнерское API для получения списка анкет.
     """
-    queryset = Questionnaire.objects.all()
+    queryset = Questionnaire.objects.prefetch_related('quest_applications').all()
     serializer_class = QuestionnaireSerializer
     search_fields = ['first_name', 'last_name', 'patronymic']
     ordering_fields = ['last_name', 'date_created', 'date_updated']
@@ -19,7 +19,7 @@ class ApplicationPartnerViewSet(mixins.CreateModelMixin, GenericViewSet):
     """
     ## Партнерское API для отправки заявки к кредитную организацию.
     """
-    queryset = Application.objects.all()
+    queryset = Application.objects.select_related('customer_profile', 'offer').all()
     serializer_class = ApplicationSerializer
 
 
@@ -27,7 +27,7 @@ class ApplicationOrganizationViewSet(ModelViewSet):
     """
     ## API кредитной организации для получения данных о заявках.
     """
-    queryset = Application.objects.all()
+    queryset = Application.objects.select_related('customer_profile', 'offer').all()
     serializer_class = ApplicationSerializer
     search_fields = [
         'customer_profile__first_name',
@@ -42,7 +42,7 @@ class ApplicationOrganizationViewSet(ModelViewSet):
     ]
 
     def retrieve(self, request, pk=None):
-        application = Application.objects.get(pk=pk)
+        application = Application.objects.select_related('customer_profile', 'offer').get(pk=pk)
         if request.user.is_organization:
             application.set_received()
         serializer = self.serializer_class(application)

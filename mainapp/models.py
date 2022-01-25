@@ -82,7 +82,8 @@ class Questionnaire(models.Model):
     def get_suitable_offers(self):
         param_1 = Q(min_scoring__lt=self.scoring)
         param_2 = Q(max_scoring__gt=self.scoring)
-        suitable_offers = Offer.objects.filter(param_1 & param_2)
+        suitable_offers = Offer.objects.select_related('organization')\
+            .prefetch_realted('offer_applications').filter(param_1 & param_2)
         return suitable_offers
 
 
