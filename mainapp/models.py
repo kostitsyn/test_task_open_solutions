@@ -2,14 +2,16 @@ from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models import Q
 
 
 class Organization(models.Model):
-    name = models.CharField(max_length=128, unique=True, verbose_name='Название огранизации')
+    name = models.CharField(max_length=128, unique=True, verbose_name='Название организации')
 
     class Meta:
         verbose_name = 'Организация'
         verbose_name_plural = 'Организации'
+        ordering = ['id']
 
     def __str__(self):
         return f'Организация {self.name}'
@@ -41,6 +43,7 @@ class Offer(models.Model):
     class Meta:
         verbose_name = 'Предложение'
         verbose_name_plural = 'Предложения'
+        ordering = ['id']
 
     def __str__(self):
         return f'Предложение {self.offer_name}'
@@ -71,9 +74,16 @@ class Questionnaire(models.Model):
     class Meta:
         verbose_name = 'Анкета'
         verbose_name_plural = 'Анкеты'
+        ordering = ['id']
 
     def __str__(self):
         return f'Анкета клиента {self.first_name} {self.last_name}'
+
+    def get_suitable_offers(self):
+        param_1 = Q(min_scoring__lt=self.scoring)
+        param_2 = Q(max_scoring__gt=self.scoring)
+        suitable_offers = Offer.objects.filter(param_1 & param_2)
+        return suitable_offers
 
 
 class Application(models.Model):
@@ -95,6 +105,7 @@ class Application(models.Model):
     class Meta:
         verbose_name = 'Заявка'
         verbose_name_plural = 'Заявки'
+        ordering = ['id']
 
     def __str__(self):
         return f'Заявка №{self.id} от {self.customer_profile.first_name} {self.customer_profile.last_name}'
@@ -102,6 +113,3 @@ class Application(models.Model):
     def set_received(self):
         self.status = 'R'
         self.save()
-
-
-

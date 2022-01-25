@@ -1,54 +1,32 @@
-from rest_framework.renderers import JSONRenderer
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from .serializers import QuestionnaireSerializer, ApplicationSerializer
 from .models import Questionnaire, Application
 from rest_framework import mixins
 from rest_framework.response import Response
-from rest_framework import generics
-from .permissions import SuperUserOnly, PartnerOnly, OrganizationOnly
 
 
-# class QuestionnaireListApiView(generics.ListAPIView):
-#     renderer_classes = [JSONRenderer]
-#     permission_classes = [SuperUserOnly, PartnerOnly]
-#     queryset = Questionnaire.objects.all()
-#     serializer_class = QuestionnaireSerializer
-#
-#
-# class QuestionnaireRetrieveApiView(generics.RetrieveAPIView):
-#     renderer_classes = [JSONRenderer]
-#     permission_classes = [SuperUserOnly, PartnerOnly]
-#     queryset = Questionnaire.objects.all()
-#     serializer_class = QuestionnaireSerializer
-#
-#
-# class QuestionnaireCreateAPIView(generics.CreateAPIView):
-#     renderer_classes = [JSONRenderer]
-#     permission_classes = [SuperUserOnly, PartnerOnly]
-#     queryset = Questionnaire.objects.all()
-#     serializer_class = QuestionnaireSerializer
-
-
-class QuestionnairePartnerViewSet(mixins.ListModelMixin,
-                                  mixins.RetrieveModelMixin,
-                                  mixins.CreateModelMixin,
-                                  GenericViewSet):
+class QuestionnairePartnerViewSet(ModelViewSet):
+    """
+    ## Партнерское API для получения списка анкет.
+    """
     queryset = Questionnaire.objects.all()
     serializer_class = QuestionnaireSerializer
     search_fields = ['first_name', 'last_name', 'patronymic']
     ordering_fields = ['last_name', 'date_created', 'date_updated']
-    # permission_classes = [SuperUserOnly, PartnerOnly]
 
 
 class ApplicationPartnerViewSet(mixins.CreateModelMixin, GenericViewSet):
+    """
+    ## Партнерское API для отправки заявки к кредитную организацию.
+    """
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
-    permission_classes = [SuperUserOnly, PartnerOnly]
 
 
-class ApplicationOrganizationViewSet(mixins.ListModelMixin,
-                                     mixins.RetrieveModelMixin,
-                                     GenericViewSet):
+class ApplicationOrganizationViewSet(ModelViewSet):
+    """
+    ## API кредитной организации для получения данных о заявках.
+    """
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
     search_fields = [
@@ -65,7 +43,8 @@ class ApplicationOrganizationViewSet(mixins.ListModelMixin,
 
     def retrieve(self, request, pk=None):
         application = Application.objects.get(pk=pk)
-        application.set_received()
+        if request.user.is_organization:
+            application.set_received()
         serializer = self.serializer_class(application)
         return Response(serializer.data)
 
